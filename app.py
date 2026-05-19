@@ -15,11 +15,12 @@ from src.utils.pdf import load_file
 
 st.set_page_config(
     layout="wide",
-    page_title="Dirty PDF → Clean Markdown",
+    page_title="DocuClean AI",
     page_icon="📄",
+    page_icon=""
 )
 
-st.title("PDF → Clean Markdown")
+st.title("DocuClean AI")
 st.subheader("Trasforma scansioni e PDF sporchi in Markdown strutturato — powered by GLM-OCR + Ollama")
 
 # ---------------------------------------------------------------------------
