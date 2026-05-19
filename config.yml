@@ -1,0 +1,11 @@
+pipeline:
+  layout:
+    model_dir: PaddlePaddle/PP-DocLayoutV3_safetensors
+  maas:
+    enabled: false
+  ocr_api:
+    api_host: 127.0.0.1
+    api_mode: ollama_generate
+    api_path: /api/generate
+    api_port: 11434
+    model: glm-ocr:latest

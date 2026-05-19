@@ -1,0 +1,9 @@
+# Web interface
+streamlit>=1.45.0
+
+# Gestione e elaborazione immagini
+pdf2image>=1.17.0
+Pillow>=10.0.0
+
+# Chiamate HTTP a Ollama
+requests>=2.31.0
