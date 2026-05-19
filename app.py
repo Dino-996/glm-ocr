@@ -16,8 +16,7 @@ from src.utils.pdf import load_file
 st.set_page_config(
     layout="wide",
     page_title="DocuClean AI",
-    page_icon="📄",
-    page_icon=""
+    page_icon="src/assets/favicon.ico"
 )
 
 st.title("DocuClean AI")
