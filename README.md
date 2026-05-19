@@ -1,4 +1,4 @@
-# 📄 GLM-OCR PDF → Markdown
+# 📄 DocuClean AI
 
 Trasforma PDF sporchi, scansioni e immagini in Markdown pulito e strutturato, usando il modello **GLM-OCR** in esecuzione locale tramite **Ollama**. Nessun dato viene inviato al cloud.
 
