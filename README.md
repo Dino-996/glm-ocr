@@ -1,4 +1,4 @@
-#  GLM-OCR PDF => Markdown
+# 📄 GLM-OCR PDF → Markdown
 
 Trasforma PDF sporchi, scansioni e immagini in Markdown pulito e strutturato, usando il modello **GLM-OCR** in esecuzione locale tramite **Ollama**. Nessun dato viene inviato al cloud.
 
@@ -8,12 +8,13 @@ Trasforma PDF sporchi, scansioni e immagini in Markdown pulito e strutturato, us
 
 ---
 
-## Funzionalità
+## ✨ Funzionalità
 
 - Caricamento di file **PDF, PNG, JPG, WEBP, TIFF**
 - Conversione pagina per pagina con **anteprima affiancata** (documento originale + Markdown)
 - Riconoscimento di **testo, grassetto, corsivo, titoli, liste, tabelle e firme**
 - **Elaborazione batch** dell'intero documento con download del file `.md` unificato
+- **Avvio automatico di Ollama** all'apertura dell'app, senza dover aprire un terminale separato
 - **100% locale** — nessuna API esterna, nessun costo per token
 
 ---
@@ -30,16 +31,16 @@ Trasforma PDF sporchi, scansioni e immagini in Markdown pulito e strutturato, us
 
 ---
 
-## Installazione
+## 🚀 Installazione
 
-### Clona il repository
+### 1. Clona il repository
 
 ```bash
 git clone https://github.com/tuo-username/glm-ocr-pdf.git
 cd glm-ocr-pdf
 ```
 
-### Crea e attiva un ambiente virtuale
+### 2. Crea e attiva un ambiente virtuale
 
 ```bash
 python -m venv .venv
@@ -51,13 +52,13 @@ python -m venv .venv
 source .venv/bin/activate
 ```
 
-### Installa le dipendenze Python
+### 3. Installa le dipendenze Python
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### Installa Ollama e il modello GLM-OCR
+### 4. Installa Ollama e il modello GLM-OCR
 
 ```bash
 # macOS / Linux
@@ -69,7 +70,7 @@ ollama pull glm-ocr:latest
 
 Su **Windows** scarica l'installer da [ollama.ai/download](https://ollama.ai/download).
 
-### Installa Poppler (solo Windows)
+### 5. Installa Poppler (solo Windows)
 
 Scarica i binari precompilati da [github.com/oschwartz10612/poppler-windows](https://github.com/oschwartz10612/poppler-windows/releases) e posiziona la cartella `poppler/` nella root del progetto:
 
@@ -81,23 +82,33 @@ glm-ocr-pdf/
         └── ...
 ```
 
----
-
-## Avvio
+Su **Linux/macOS** Poppler viene trovato automaticamente nel PATH di sistema:
 
 ```bash
-# Assicurati che Ollama sia in esecuzione
-ollama serve
+# Ubuntu / Debian
+sudo apt install poppler-utils
 
-# In un altro terminale, avvia l'app
+# macOS
+brew install poppler
+```
+
+---
+
+## ▶️ Avvio
+
+```bash
 streamlit run app.py
 ```
 
 Apri il browser su [http://localhost:8501](http://localhost:8501).
 
+> **Ollama si avvia da solo.** All'apertura dell'app viene verificato automaticamente se Ollama è in esecuzione. Se non lo è, viene lanciato in background senza bisogno di aprire un terminale separato. Un toast verde conferma la connessione riuscita.
+>
+> Se Ollama non viene trovato nel PATH, l'app mostra un messaggio di errore con le istruzioni per installarlo.
+
 ---
 
-## Configurazione
+## ⚙️ Configurazione
 
 Tutte le costanti sono centralizzate in `src/config/settings.py`:
 
@@ -113,12 +124,12 @@ Tutte le costanti sono centralizzate in `src/config/settings.py`:
 
 ---
 
-## Struttura del progetto
+## 🗂️ Struttura del progetto
 
 ```
 glm-ocr-pdf/
 │
-├── app.py                      # Entry point — layout e session state
+├── app.py                      # Entry point — layout, session state e avvio Ollama
 │
 ├── src/
 │   ├── config/
@@ -131,17 +142,26 @@ glm-ocr-pdf/
 │   │   └── components.py       # Componenti Streamlit (colonne, batch, download)
 │   │
 │   └── utils/
+│       ├── ollama.py           # Avvio automatico e health-check di Ollama
 │       └── pdf.py              # Caricamento PDF e immagini → lista PIL.Image
 │
 ├── requirements.txt
+├── .gitignore
 └── README.md
 ```
 
 ---
 
-## Come funziona
+## 🧠 Come funziona
 
 ```
+Avvio app
+     │
+     ▼
+utils/ollama.py       → health-check su /api/tags; se Ollama non risponde,
+                         lancia `ollama serve` in background e attende fino a 15s
+     │
+     ▼
 File caricato
      │
      ▼
@@ -153,28 +173,32 @@ core/ocr.py           → ridimensiona l'immagine (max 1400px) per rispettare il
                          POST /api/generate con il campo `images`
      │
      ▼
-GLM-OCR su Ollama     → elabora l'immagine e restituisce il Markdown
+GLM-OCR su Ollama     → elabora l'immagine e restituisce il Markdown strutturato
      │
      ▼
 ui/components.py      → visualizza anteprima renderizzata, sorgente e download
 ```
 
-> **Perché chiamata diretta a `/api/generate`?**  
-> Il wrapper Python `GlmOcr` non include il campo `images` nel payload JSON quando usa il backend Ollama, causando risposte vuote. La chiamata diretta tramite `requests` garantisce il formato corretto.
+> **Perché chiamata diretta a `/api/generate`?**
+> Il wrapper Python `GlmOcr` non include il campo `images` nel payload JSON quando usa il backend Ollama, causando risposte vuote (`## \n## \n## `). La chiamata diretta tramite `requests` garantisce il formato corretto richiesto dai modelli vision.
+
+> **Perché `num_ctx=8192`?**
+> A 150 DPI una pagina A4 genera circa 3000–4000 token visivi. Il context window di default di Ollama (4096) non è sufficiente: il runner tronca l'immagine e crasha con `GGML_ASSERT`. Impostare `num_ctx=8192` risolve il problema usando circa 512 MB di VRAM extra.
 
 ---
 
-## Troubleshooting
+## 🐛 Troubleshooting
 
 | Errore | Causa | Soluzione |
 |---|---|---|
-| `ConnectionError` | Ollama non è avviato | Eseguire `ollama serve` |
-| `GGML_ASSERT` crash | Immagine troppo grande (> 4096 token) | Abbassare `IMAGE_MAX_WIDTH` o `PDF_DPI` |
-| Output vuoto `## ` | Immagine non passata correttamente | Verificare che si usi `run_ocr` da `core/ocr.py` |
-| Errore Poppler (Windows) | Binari non trovati | Posizionare `poppler/bin/` nella root del progetto |
+| `ollama` non trovato nel PATH | Ollama non installato o non nel PATH | Installa Ollama e riavvia il terminale |
+| Ollama non risponde entro 15s | Avvio lento o conflitto di porta | Avvia manualmente `ollama serve` |
+| `GGML_ASSERT` crash (HTTP 500) | Immagine troppo grande per il context window | Abbassare `IMAGE_MAX_WIDTH` o `PDF_DPI` in `settings.py` |
+| Output vuoto `## ` | Immagine non inclusa nella richiesta | Verificare che si usi `run_ocr` da `core/ocr.py` |
+| Errore Poppler su Windows | Binari non trovati | Posizionare `poppler/bin/` nella root del progetto |
 
 ---
 
-## Licenza
+## 📄 Licenza
 
-MIT — libero per uso personale e commerciale
+MIT — libero per uso personale e commerciale.
