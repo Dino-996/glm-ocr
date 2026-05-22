@@ -196,9 +196,3 @@ ui/components.py      → visualizza anteprima renderizzata, sorgente e download
 | `GGML_ASSERT` crash (HTTP 500) | Immagine troppo grande per il context window | Abbassare `IMAGE_MAX_WIDTH` o `PDF_DPI` in `settings.py` |
 | Output vuoto `## ` | Immagine non inclusa nella richiesta | Verificare che si usi `run_ocr` da `core/ocr.py` |
 | Errore Poppler su Windows | Binari non trovati | Posizionare `poppler/bin/` nella root del progetto |
-
----
-
-## 📄 Licenza
-
-MIT — libero per uso personale e commerciale.
